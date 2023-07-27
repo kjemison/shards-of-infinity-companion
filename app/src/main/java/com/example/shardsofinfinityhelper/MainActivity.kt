@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxColors
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -94,7 +96,11 @@ fun PlayerArea(player: Player, modifier: Modifier = Modifier) {
 					.scale(1.5f)
 					.align(CenterVertically),
 				checked = selected,
-				onCheckedChange = { selected = it }
+				onCheckedChange = { selected = it },
+				colors = CheckboxDefaults.colors(
+					uncheckedColor = Color.White,
+					checkedColor = Color.White
+				)
 			)
 			Spacer(modifier = Modifier.width(30.dp))
 			Text(

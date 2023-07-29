@@ -8,4 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="background">#1A1D30</color>
+    <color name="tetra_color">#1b718a</color>
+    <color name="decima_color">#7C764C</color>
+    <color name="rez_color">#B91A19</color>
+    <color name="volos_color">#286846</color>
+    <color name="ko_syn_wu_color">#723B7E</color>
 </resources>

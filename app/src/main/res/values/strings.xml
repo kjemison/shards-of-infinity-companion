@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Shards Of Infinity Helper</string>
+    <string name="decima_name">Decima</string>
+    <string name="tetra_name">Tetra</string>
+    <string name="ko_syn_wu_name">Ko Syn Wu</string>
+    <string name="volos_name">Volos</string>
+    <string name="rez_name">Rez</string>
 </resources>

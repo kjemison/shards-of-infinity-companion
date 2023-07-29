@@ -40,17 +40,45 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 val arrowHeightModifier = Modifier
 	.height(45.dp)
 
 class MainActivity : ComponentActivity() {
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
 			Players()
 		}
+
+		val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+		// Configure the behavior of the hidden system bars.
+		windowInsetsController.systemBarsBehavior =
+			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+		window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+			if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+				|| windowInsets.isVisible(WindowInsetsCompat.Type.statusBars()))
+			{
+				windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+			}
+
+			view.onApplyWindowInsets(windowInsets)
+		}
+
+//		// Hide top action bar
+//		actionBar?.hide()
+//		WindowCompat.setDecorFitsSystemWindows(window, false)
+//		window.insetsController?.apply {
+//			hide(WindowInsets.Type.statusBars())
+//			systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//		}
 	}
+
 }
 
 @Composable
@@ -208,7 +236,7 @@ fun PlayerInfo(player: Player, modifier: Modifier = Modifier) {
 			verticalAlignment = CenterVertically,
 			modifier = Modifier
 				.align(CenterHorizontally)
-				.padding(bottom = 16.dp)
+				.padding(bottom = 24.dp)
 		) {
 			var selected by remember { mutableStateOf(false) }
 
@@ -241,7 +269,8 @@ fun Players() {
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
-			.background(color = colorResource(id = R.color.background))
+			.background(color = colorResource(id = R.color.background)),
+		verticalArrangement = Arrangement.SpaceBetween
 	) {
 		PlayerInfo(player = player1, modifier = Modifier.rotate(180f))
 		PlayerInfo(player = player2)

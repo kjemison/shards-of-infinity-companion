@@ -23,9 +23,11 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -37,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -47,12 +48,80 @@ import androidx.core.view.WindowInsetsControllerCompat
 val arrowHeightModifier = Modifier
 	.height(45.dp)
 
+val charactersList = listOf<Character>(
+	Character(
+		name = R.string.tetra_name.toString(),
+		nameResource = R.string.tetra_name,
+		colorResource = R.color.tetra_color
+	),
+	Character(
+		name = R.string.decima_name.toString(),
+		nameResource = R.string.decima_name,
+		colorResource = R.color.decima_color
+	),
+	Character(
+		name = R.string.ko_syn_wu_name.toString(),
+		nameResource = R.string.ko_syn_wu_name,
+		colorResource = R.color.ko_syn_wu_color
+	),
+	Character(
+		name = R.string.volos_name.toString(),
+		nameResource = R.string.volos_name,
+		colorResource = R.color.volos_color
+	),
+	Character(
+		name = R.string.rez_name.toString(),
+		nameResource = R.string.rez_name,
+		colorResource = R.color.rez_color
+	)
+)
+
 class MainActivity : ComponentActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
-			Players()
+			val player1 = Player()
+			val player2 = Player()
+
+			Column(modifier = Modifier
+				.fillMaxSize()
+				.background(color = colorResource(id = R.color.background)),
+				verticalArrangement = Arrangement.SpaceEvenly
+			) {
+				val charactersListState = remember {
+					mutableStateListOf(
+						Character(
+							name = R.string.tetra_name.toString(),
+							nameResource = R.string.tetra_name,
+							colorResource = R.color.tetra_color
+						),
+						Character(
+							name = R.string.decima_name.toString(),
+							nameResource = R.string.decima_name,
+							colorResource = R.color.decima_color
+						),
+						Character(
+							name = R.string.ko_syn_wu_name.toString(),
+							nameResource = R.string.ko_syn_wu_name,
+							colorResource = R.color.ko_syn_wu_color
+						),
+						Character(
+							name = R.string.volos_name.toString(),
+							nameResource = R.string.volos_name,
+							colorResource = R.color.volos_color
+						),
+						Character(
+							name = R.string.rez_name.toString(),
+							nameResource = R.string.rez_name,
+							colorResource = R.color.rez_color
+						)
+					)
+				}
+
+				PlayerArea(player1, modifier = Modifier.rotate(180f), charactersListState)
+				PlayerArea(player2, modifier = Modifier, charactersListState)
+			}
 		}
 
 		val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -178,10 +247,17 @@ fun Arrow(
 }
 
 @Composable
-fun CharacterBanner(character: String, characterColor: Int) {
+fun CharacterBanner(
+	characterName: String,
+	characterColor: Int,
+	modifier: Modifier = Modifier,
+	onClick: () -> Unit
+) {
 	Row(
-		modifier = Modifier
-			.padding(start = 16.dp, top = 16.dp, bottom = 0.dp, end = 16.dp)
+		modifier = modifier
+			.clickable {
+				onClick()
+			}
 			.fillMaxWidth()
 			.height(40.dp)
 			.background(
@@ -192,9 +268,9 @@ fun CharacterBanner(character: String, characterColor: Int) {
 		horizontalArrangement = Arrangement.Start,
 		verticalAlignment = CenterVertically
 	) {
-		Box() {
+		Box {
 			Text(
-				text = character,
+				text = characterName,
 				color = Color.DarkGray,
 				fontSize = 25.sp,
 				modifier = Modifier
@@ -205,7 +281,7 @@ fun CharacterBanner(character: String, characterColor: Int) {
 					.alpha(0.75f)
 			)
 			Text(
-				text = character,
+				text = characterName,
 				fontSize = 25.sp,
 				color = Color.White
 			)
@@ -218,10 +294,14 @@ fun PlayerInfo(player: Player, modifier: Modifier = Modifier) {
 	Column(
 		modifier = modifier
 	) {
-		CharacterBanner(
-			character = stringResource(id = R.string.rez_name),
-			characterColor = R.color.rez_color
-		)
+		player.characterState?.let {
+			CharacterBanner(
+				characterName = stringResource(id = it.nameResource),
+				characterColor = it.colorResource,
+				modifier = Modifier.padding(16.dp),
+				onClick = {}
+			)
+		}
 		Row(
 			modifier = Modifier
 				.padding(start = 16.dp, end = 16.dp, top = 8.dp),
@@ -261,45 +341,54 @@ fun PlayerInfo(player: Player, modifier: Modifier = Modifier) {
 	}
 }
 
-@Preview
 @Composable
-fun Players() {
-	val player1 = Player("player1")
-	val player2 = Player("player2")
+fun PlayerArea(
+	player: Player,
+	modifier: Modifier = Modifier,
+	characterListState: SnapshotStateList<Character>
+) {
 	Column(
-		modifier = Modifier
-			.fillMaxSize()
+		modifier = modifier
 			.background(color = colorResource(id = R.color.background)),
-		verticalArrangement = Arrangement.SpaceBetween
+		verticalArrangement = Arrangement.SpaceBetween,
 	) {
-		PlayerInfo(player = player1, modifier = Modifier.rotate(180f))
-		PlayerInfo(player = player2)
+		if (player.characterState == null) {
+			ChooseCharacters(modifier = Modifier, player, characterListState)
+		} else {
+			PlayerInfo(player = player, modifier = Modifier)
+		}
 	}
 }
 
-@Preview(showBackground = true)
 @Composable
-fun Characters() {
-	Column() {
-		CharacterBanner(
-			character = stringResource(id = R.string.tetra_name),
-			characterColor = R.color.tetra_color
+fun ChooseCharacters(
+	modifier: Modifier = Modifier,
+	player: Player = Player(),
+	characterListState: SnapshotStateList<Character>
+){
+	Column(
+		horizontalAlignment = CenterHorizontally,
+		modifier = modifier
+			.background(color = colorResource(id = R.color.background))
+			.padding(16.dp),
+		verticalArrangement = Arrangement.spacedBy(16.dp)
+	) {
+		Text(
+			color = Color.White,
+			text = "Pick a character: ",
+			fontSize = 40.sp,
+			modifier = Modifier.padding(16.dp)
 		)
-		CharacterBanner(
-			character = stringResource(id = R.string.decima_name),
-			characterColor = R.color.decima_color
-		)
-		CharacterBanner(
-			character = stringResource(id = R.string.ko_syn_wu_name),
-			characterColor = R.color.ko_syn_wu_color
-		)
-		CharacterBanner(
-			character = stringResource(id = R.string.volos_name),
-			characterColor = R.color.volos_color
-		)
-		CharacterBanner(
-			character = stringResource(id = R.string.rez_name),
-			characterColor = R.color.rez_color
-		)
+
+		for (i in 0 until characterListState.size) {
+			CharacterBanner(
+				characterName = stringResource(id = characterListState[i].nameResource),
+				characterColor = characterListState[i].colorResource,
+				onClick = {
+					player.characterState = characterListState[i]
+					characterListState.removeAt(i)
+				}
+			)
+		}
 	}
 }
